@@ -1,16 +1,16 @@
 const express = require('express');
 const EventMap = require('./util/EventMap');
 const { startEthLoop } = require('./util/eth');
+const {
+  getLikeInfo,
+  updateLikeInfo,
+  postLikeInfo,
+} = require('./util/like');
 
 const BUFFER_SIZE = 200;
 
 const ethData = new EventMap(BUFFER_SIZE);
 let pendingDatas = [];
-
-/* likechain */
-async function getLikeInfo() {
-  return [6140198]; // restful call placeholder
-}
 
 /* logic */
 async function init() {
@@ -22,6 +22,19 @@ async function init() {
     /* on new event handle, events is list of blockId + event obj */
     pendingDatas = pendingDatas.concat(events);
   });
+
+  /* likechain update loop */
+  setInterval(async () => {
+    const blockNumbers = await updateLikeInfo();
+    /* remove completed blockIds from pending */
+    pendingDatas = pendingDatas.filter(e => !blockNumbers.includes(e.blockNumber));
+    const POST_LIMIT = 2;
+    const postEvents = pendingDatas.slice(0, POST_LIMIT);
+    for (let i = 0; i < postEvents.length; i +=1 ) {
+      const payload = pendingDatas[i];
+      await postLikeInfo(payload.blockNumber, payload.events);
+    }
+  }, 5000);
 }
 
 /* web server */
