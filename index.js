@@ -5,16 +5,23 @@ const { startEthLoop } = require('./util/eth');
 const BUFFER_SIZE = 200;
 
 const ethData = new EventMap(BUFFER_SIZE);
+let pendingDatas = [];
 
 /* likechain */
 async function getLikeInfo() {
   return [6140198]; // restful call placeholder
 }
 
+/* logic */
 async function init() {
   const lastBlocksProcessed = await getLikeInfo();
   const startBlock = Math.min(...lastBlocksProcessed) - BUFFER_SIZE;
-  startEthLoop(ethData, startBlock);
+  const endBlock = Math.max(...lastBlocksProcessed);
+
+  startEthLoop(ethData, startBlock, endBlock, (events) => {
+    /* on new event handle, events is list of blockId + event obj */
+    pendingDatas = pendingDatas.concat(events);
+  });
 }
 
 /* web server */

@@ -15,6 +15,7 @@ function timeout(ms) {
 }
 
 async function getBlockEvents(fromBlock = 0, toBlock = 'latest') {
+  console.log(`ETH: Checking ${fromBlock} to ${toBlock}`);
   return LikeCoin.getPastEvents('Transfer', {
     filter: {
       // to: '0x6A9e2dE467097B4D14F44944aC2a49A750Fc93b8',
@@ -33,6 +34,7 @@ function handleEventsIntoMap(ethDataMap, events) {
     acc[blockNumber].push({ from, to, value });
     return acc;
   }, {});
+  const output = [];
   Object.keys(map).forEach((blockNumber) => {
     map[blockNumber].sort((a, b) => {
       if (a.from !== b.from) return a.from > b.from;
@@ -41,14 +43,13 @@ function handleEventsIntoMap(ethDataMap, events) {
       return 0;
     });
     ethDataMap.setEventData(blockNumber, map[blockNumber]);
+    output.push({ blockNumber, events: map[blockNumber] });
   });
+  output.sort((a, b) => a.blockNumber > b.blockNumber);
+  return output;
 }
 
-async function startEthLoop(ethDataMap, startBlock) {
-  const endBlock = await web3.eth.getBlockNumber() - CONFIRM_BLOCKS;
-
-  console.log(`ETH: Checking ${startBlock} to ${endBlock}`);
-
+async function startEthLoop(ethDataMap, startBlock, endBlock, newEventCallback) {
   let events = await getBlockEvents(startBlock, endBlock);
   handleEventsIntoMap(ethDataMap, events);
   lastBlock = endBlock;
@@ -57,10 +58,12 @@ async function startEthLoop(ethDataMap, startBlock) {
   while (isLooping) {
     const currentBlock = await web3.eth.getBlockNumber() - CONFIRM_BLOCKS;
     if (currentBlock > lastBlock) {
-      console.log(`ETH: Checking ${lastBlock + 1} to ${currentBlock}`);
       events = await getBlockEvents(lastBlock + 1, currentBlock);
-      handleEventsIntoMap(ethDataMap, events);
-      lastBlock = endBlock;
+      const newEvents = handleEventsIntoMap(ethDataMap, events);
+      if (newEvents && newEventCallback && typeof newEventCallback === "function") {
+        newEventCallback(newEvents);
+      }
+      lastBlock = currentBlock;
     }
     await timeout(5000);
   }
