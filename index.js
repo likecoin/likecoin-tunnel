@@ -30,8 +30,9 @@ async function init() {
     pendingDatas = pendingDatas.filter(e => !blockNumbers.includes(e.blockNumber));
     const POST_LIMIT = 2;
     const postEvents = pendingDatas.slice(0, POST_LIMIT);
-    for (let i = 0; i < postEvents.length; i +=1 ) {
+    for (let i = 0; i < postEvents.length; i += 1) {
       const payload = pendingDatas[i];
+      /* eslint-disable-next-line no-await-in-loop */
       await postLikeInfo(payload.blockNumber, payload.events);
     }
   }, 5000);

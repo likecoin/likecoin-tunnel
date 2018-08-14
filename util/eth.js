@@ -35,7 +35,8 @@ function handleEventsIntoMap(ethDataMap, events) {
     return acc;
   }, {});
   const output = [];
-  Object.keys(map).forEach((blockNumber) => {
+  Object.keys(map).forEach((key) => {
+    const blockNumber = Number(key); // want number for blockNumber
     map[blockNumber].sort((a, b) => {
       if (a.from !== b.from) return a.from > b.from;
       // only sort by string
@@ -60,7 +61,7 @@ async function startEthLoop(ethDataMap, startBlock, endBlock, newEventCallback) 
     if (currentBlock > lastBlock) {
       events = await getBlockEvents(lastBlock + 1, currentBlock);
       const newEvents = handleEventsIntoMap(ethDataMap, events);
-      if (newEvents && newEventCallback && typeof newEventCallback === "function") {
+      if (newEvents && newEventCallback && typeof newEventCallback === 'function') {
         newEventCallback(newEvents);
       }
       lastBlock = currentBlock;
