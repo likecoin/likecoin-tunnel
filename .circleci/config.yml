@@ -4,6 +4,8 @@ jobs:
     working_directory: ~/likecoin-tunnel
     docker:
       - image: node:10
+      - image: ethereum/client-go:stable
+        command: ['--ws', '--wsport', '8546', '--wsorigins', '*', '--wsaddr', '0.0.0.0', '--syncmode', 'light']
     steps:
       - checkout
       - restore_cache:
