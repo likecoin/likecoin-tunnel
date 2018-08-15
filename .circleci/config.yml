@@ -5,7 +5,7 @@ jobs:
     docker:
       - image: node:10
       - image: ethereum/client-go:stable
-        command: ['--ws', '--wsport', '8546', '--wsorigins', '*', '--wsaddr', '0.0.0.0', '--syncmode', 'light']
+        command: ['--rpc', '--rpcaddr', '0.0.0.0', '--rpcapi', 'eth,web3', '--syncmode', 'light']
     steps:
       - checkout
       - restore_cache:

@@ -1,8 +1,8 @@
 const Web3 = require('web3');
 const LIKECOIN = require('../constant/contract/likecoin');
 
-// const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+// const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
 const LikeCoin = new web3.eth.Contract(LIKECOIN.LIKE_COIN_ABI, LIKECOIN.LIKE_COIN_ADDRESS);
 
 const CONFIRM_BLOCKS = 24;
