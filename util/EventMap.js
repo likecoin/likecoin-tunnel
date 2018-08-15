@@ -9,12 +9,14 @@ class EventMap {
     if (this.map.get(id)) throw new Error(`key ${key} already exist`);
     this.map.set(id, events);
     while (this.map.size > this.sizeLimit) {
-      this.map.delete(this.map.keys().next().value);
+      const dropKey = this.map.keys().next().value;
+      console.log(`EventMap: dropping ${dropKey}`);
+      this.map.delete(dropKey);
     }
   }
 
   getEventData(key) {
-    return this.map.get(key);
+    return this.map.get(key.toString());
   }
 }
 

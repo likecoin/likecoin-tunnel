@@ -5,7 +5,7 @@ const LIKECOIN = require('../constant/contract/likecoin');
 const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
 const LikeCoin = new web3.eth.Contract(LIKECOIN.LIKE_COIN_ABI, LIKECOIN.LIKE_COIN_ADDRESS);
 
-const CONFIRM_BLOCKS = 12;
+const CONFIRM_BLOCKS = 24;
 
 let lastBlock = 0;
 let isLooping = true;
@@ -38,15 +38,20 @@ function handleEventsIntoMap(ethDataMap, events) {
   Object.keys(map).forEach((key) => {
     const blockNumber = Number(key); // want number for blockNumber
     map[blockNumber].sort((a, b) => {
-      if (a.from !== b.from) return a.from > b.from;
+      if (a.from !== b.from) return a.from > b.from ? 1 : -1;
       // only sort by string
-      if (a.value !== b.value) return a.value > b.value;
+      if (a.value !== b.value) return a.value > b.value ? 1 : -1;
       return 0;
     });
     ethDataMap.setEventData(blockNumber, map[blockNumber]);
     output.push({ blockNumber, events: map[blockNumber] });
   });
-  output.sort((a, b) => a.blockNumber > b.blockNumber);
+  output.sort((a, b) => {
+    if (a.blockNumber !== b.blockNumber) {
+      return a.blockNumber > b.blockNumber ? 1 : -1;
+    }
+    return 0;
+  });
   return output;
 }
 
