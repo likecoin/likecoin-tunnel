@@ -1,11 +1,12 @@
 const Web3 = require('web3');
 const LIKECOIN = require('../constant/contract/likecoin');
 
-// const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+// const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
 const LikeCoin = new web3.eth.Contract(LIKECOIN.LIKE_COIN_ABI, LIKECOIN.LIKE_COIN_ADDRESS);
 
 const CONFIRM_BLOCKS = 24;
+const ETH_LOOP_INTERVAL = 5000;
 
 let lastBlock = 0;
 let isLooping = true;
@@ -56,22 +57,31 @@ function handleEventsIntoMap(ethDataMap, events) {
 }
 
 async function startEthLoop(ethDataMap, startBlock, endBlock, newEventCallback) {
-  let events = await getBlockEvents(startBlock, endBlock);
-  handleEventsIntoMap(ethDataMap, events);
-  lastBlock = endBlock;
+  lastBlock = startBlock;
+  try {
+    const events = await getBlockEvents(startBlock, endBlock);
+    handleEventsIntoMap(ethDataMap, events);
+    lastBlock = endBlock;
+  } catch (err) {
+    console.error(err);
+  }
 
   /* eslint-disable no-await-in-loop */
   while (isLooping) {
-    const currentBlock = await web3.eth.getBlockNumber() - CONFIRM_BLOCKS;
-    if (currentBlock > lastBlock) {
-      events = await getBlockEvents(lastBlock + 1, currentBlock);
-      const newEvents = handleEventsIntoMap(ethDataMap, events);
-      if (newEvents && newEventCallback && typeof newEventCallback === 'function') {
-        newEventCallback(newEvents);
+    try {
+      const currentBlock = await web3.eth.getBlockNumber() - CONFIRM_BLOCKS;
+      if (currentBlock > lastBlock) {
+        const events = await getBlockEvents(lastBlock + 1, currentBlock);
+        const newEvents = handleEventsIntoMap(ethDataMap, events);
+        if (newEvents && newEventCallback && typeof newEventCallback === 'function') {
+          newEventCallback(newEvents);
+        }
+        lastBlock = currentBlock;
       }
-      lastBlock = currentBlock;
+    } catch (err) {
+      console.error(err);
     }
-    await timeout(5000);
+    await timeout(ETH_LOOP_INTERVAL);
   }
   /* eslint-enable no-await-in-loop */
 }

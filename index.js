@@ -25,26 +25,29 @@ async function init() {
 
   /* likechain update loop */
   setInterval(async () => {
-    const blockNumbers = await updateLikeInfo();
-    if (blockNumbers && blockNumbers.length) {
-      const DROP_BLOCK_LIMIT = 1000;
-      const dropThersold = Math.min(...lastBlocksProcessed) + DROP_BLOCK_LIMIT;
-      pendingDatas = pendingDatas.filter((e) => {
-        /* remove completed blockIds from pending */
-        const stay = (!blockNumbers.includes(e.blockNumber)
-        /* remove not cached from pending */
-        && !!ethData.getEventData(e.blockNumber)
-        /* remove outsync data from pending */
-        && e.blockNumber > dropThersold);
-        return stay;
-      });
-    }
-    const POST_LIMIT = 2;
-    const postEvents = pendingDatas.slice(0, POST_LIMIT);
-    for (let i = 0; i < postEvents.length; i += 1) {
-      const payload = postEvents[i];
-      /* eslint-disable-next-line no-await-in-loop */
-      await postLikeInfo(payload.blockNumber, payload.events);
+    try {
+      const blockNumbers = await updateLikeInfo();
+      if (blockNumbers && blockNumbers.length) {
+        const DROP_BLOCK_LIMIT = 1000;
+        const dropThersold = Math.min(...lastBlocksProcessed) + DROP_BLOCK_LIMIT;
+        pendingDatas = pendingDatas.filter(e => (
+          /* remove completed blockIds from pending */
+          !blockNumbers.includes(e.blockNumber)
+          /* remove not cached from pending */
+          && !!ethData.getEventData(e.blockNumber)
+          /* remove outsync data from pending */
+          && e.blockNumber > dropThersold
+        ));
+      }
+      const POST_LIMIT = 2;
+      const postEvents = pendingDatas.slice(0, POST_LIMIT);
+      for (let i = 0; i < postEvents.length; i += 1) {
+        const payload = postEvents[i];
+        /* eslint-disable-next-line no-await-in-loop */
+        await postLikeInfo(payload.blockNumber, payload.events);
+      }
+    } catch (err) {
+      console.error(err);
     }
   }, 5000);
 }
