@@ -30,15 +30,14 @@ async function init() {
       if (blockNumbers && blockNumbers.length) {
         const DROP_BLOCK_LIMIT = 1000;
         const dropThersold = Math.min(...lastBlocksProcessed) + DROP_BLOCK_LIMIT;
-        pendingDatas = pendingDatas.filter((e) => {
+        pendingDatas = pendingDatas.filter(e => (
           /* remove completed blockIds from pending */
-          const stay = (!blockNumbers.includes(e.blockNumber)
+          !blockNumbers.includes(e.blockNumber)
           /* remove not cached from pending */
           && !!ethData.getEventData(e.blockNumber)
           /* remove outsync data from pending */
-          && e.blockNumber > dropThersold);
-          return stay;
-        });
+          && e.blockNumber > dropThersold
+        ));
       }
       const POST_LIMIT = 2;
       const postEvents = pendingDatas.slice(0, POST_LIMIT);
