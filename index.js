@@ -7,15 +7,18 @@ const {
   postLikeInfo,
 } = require('./util/like');
 
-const BUFFER_SIZE = 200;
+const ETH_MAP_SIZE = process.env.ETH_MAP_SIZE || 200;
+const LIKE_DROP_BLOCK_LIMIT = process.env.LIKE_DROP_BLOCK_LIMIT || 1000;
+const LIKE_POST_LIMIT = process.env.LIKE_POST_LIMIT || 2;
+const LIKE_LOOP_INTERVAL_MS = process.env.LIKE_LOOP_INTERVAL_MS || 5000;
 
-const ethData = new EventMap(BUFFER_SIZE);
+const ethData = new EventMap(ETH_MAP_SIZE);
 let pendingDatas = [];
 
 /* logic */
 async function init() {
   const lastBlocksProcessed = await getLikeInfo();
-  const startBlock = Math.min(...lastBlocksProcessed) - BUFFER_SIZE;
+  const startBlock = Math.min(...lastBlocksProcessed) - ETH_MAP_SIZE;
   const endBlock = Math.max(...lastBlocksProcessed);
 
   startEthLoop(ethData, startBlock, endBlock, (events) => {
@@ -28,8 +31,7 @@ async function init() {
     try {
       const blockNumbers = await updateLikeInfo();
       if (blockNumbers && blockNumbers.length) {
-        const DROP_BLOCK_LIMIT = 1000;
-        const dropThersold = Math.min(...lastBlocksProcessed) + DROP_BLOCK_LIMIT;
+        const dropThersold = Math.min(...lastBlocksProcessed) + LIKE_DROP_BLOCK_LIMIT;
         pendingDatas = pendingDatas.filter(e => (
           /* remove completed blockIds from pending */
           !blockNumbers.includes(e.blockNumber)
@@ -39,8 +41,7 @@ async function init() {
           && e.blockNumber > dropThersold
         ));
       }
-      const POST_LIMIT = 2;
-      const postEvents = pendingDatas.slice(0, POST_LIMIT);
+      const postEvents = pendingDatas.slice(0, LIKE_POST_LIMIT);
       for (let i = 0; i < postEvents.length; i += 1) {
         const payload = postEvents[i];
         /* eslint-disable-next-line no-await-in-loop */
@@ -49,7 +50,7 @@ async function init() {
     } catch (err) {
       console.error(err);
     }
-  }, 5000);
+  }, LIKE_LOOP_INTERVAL_MS);
 }
 
 /* web server */

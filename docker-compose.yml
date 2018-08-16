@@ -1,0 +1,32 @@
+version: '3'
+services:
+  tunnel:
+    build:
+      context: .
+    depends_on:
+    - geth
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      ETH_MAP_SIZE: 200
+      LIKE_DROP_BLOCK_LIMIT: 1000
+      LIKE_POST_LIMIT: 2
+      LIKE_LOOP_INTERVAL_MS: 5000
+      WEB_THREE_HOST: http://geth:8545
+      CONFIRM_BLOCKS:
+      ETH_LOOP_INTERVAL_MS:
+      ETH_EVENT_FILTER_TO:
+      ETH_EVENT_FILTER_FROM: '0x6A9e2dE467097B4D14F44944aC2a49A750Fc93b8'
+  geth:
+    image: ethereum/client-go
+    ports:
+      - '30303:30303'
+    command: ['--rpc', '--rpcvhosts', 'geth', '--rpcaddr', '0.0.0.0', '--rpcapi', 'eth,web3', '--syncmode', 'light']
+    volumes:
+      - geth_data:/root
+volumes:
+  geth_data:
+    driver: local

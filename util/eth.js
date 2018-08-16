@@ -1,12 +1,15 @@
 const Web3 = require('web3');
 const LIKECOIN = require('../constant/contract/likecoin');
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+const WEB_THREE_HOST = process.env.WEB_THREE_HOST || 'http://localhost:8545';
+const CONFIRM_BLOCKS = process.env.ETH_CONFIRM_BLOCKS || 24;
+const ETH_LOOP_INTERVAL_MS = process.env.ETH_LOOP_INTERVAL_MS || 5000;
+const ETH_EVENT_FILTER_TO = process.env.ETH_EVENT_FILTER_TO || undefined;
+const ETH_EVENT_FILTER_FROM = process.env.ETH_EVENT_FILTER_FROM || undefined;
+
+const web3 = new Web3(new Web3.providers.HttpProvider(WEB_THREE_HOST));
 // const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
 const LikeCoin = new web3.eth.Contract(LIKECOIN.LIKE_COIN_ABI, LIKECOIN.LIKE_COIN_ADDRESS);
-
-const CONFIRM_BLOCKS = 24;
-const ETH_LOOP_INTERVAL = 5000;
 
 let lastBlock = 0;
 let isLooping = true;
@@ -19,8 +22,8 @@ async function getBlockEvents(fromBlock = 0, toBlock = 'latest') {
   console.log(`ETH: Checking ${fromBlock} to ${toBlock}`);
   return LikeCoin.getPastEvents('Transfer', {
     filter: {
-      // to: '0x6A9e2dE467097B4D14F44944aC2a49A750Fc93b8',
-      from: '0x65b8E5D9d95e707349789E42fa2f88EE5B20B072',
+      to: ETH_EVENT_FILTER_TO,
+      from: ETH_EVENT_FILTER_FROM,
     },
     fromBlock,
     toBlock,
@@ -81,7 +84,7 @@ async function startEthLoop(ethDataMap, startBlock, endBlock, newEventCallback) 
     } catch (err) {
       console.error(err);
     }
-    await timeout(ETH_LOOP_INTERVAL);
+    await timeout(ETH_LOOP_INTERVAL_MS);
   }
   /* eslint-enable no-await-in-loop */
 }

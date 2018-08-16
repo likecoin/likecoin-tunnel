@@ -19,6 +19,8 @@ jobs:
       - run:
           name: Server Test
           command: npm start
+          environment:
+            ETH_EVENT_FILTER_FROM: '0x6A9e2dE467097B4D14F44944aC2a49A750Fc93b8'
           background: true
       - run:
           name: wget Test
