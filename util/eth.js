@@ -3,7 +3,7 @@ const LIKECOIN = require('../constant/contract/likecoin');
 
 const WEB_THREE_HOST = process.env.WEB_THREE_HOST || 'http://localhost:8545';
 const CONFIRM_BLOCKS = process.env.ETH_CONFIRM_BLOCKS || 24;
-const ETH_LOOP_INTERVAL = process.env.ETH_LOOP_INTERVAL || 5000;
+const ETH_LOOP_INTERVAL_MS = process.env.ETH_LOOP_INTERVAL_MS || 5000;
 const ETH_EVENT_FILTER_TO = process.env.ETH_EVENT_FILTER_TO || undefined;
 const ETH_EVENT_FILTER_FROM = process.env.ETH_EVENT_FILTER_FROM || undefined;
 
@@ -84,7 +84,7 @@ async function startEthLoop(ethDataMap, startBlock, endBlock, newEventCallback) 
     } catch (err) {
       console.error(err);
     }
-    await timeout(ETH_LOOP_INTERVAL);
+    await timeout(ETH_LOOP_INTERVAL_MS);
   }
   /* eslint-enable no-await-in-loop */
 }

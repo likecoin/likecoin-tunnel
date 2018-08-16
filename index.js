@@ -10,7 +10,7 @@ const {
 const ETH_MAP_SIZE = process.env.ETH_MAP_SIZE || 200;
 const LIKE_DROP_BLOCK_LIMIT = process.env.LIKE_DROP_BLOCK_LIMIT || 1000;
 const LIKE_POST_LIMIT = process.env.LIKE_POST_LIMIT || 2;
-const LIKE_LOOP_INTERVAL = process.env.LIKE_LOOP_INTERVAL || 5000;
+const LIKE_LOOP_INTERVAL_MS = process.env.LIKE_LOOP_INTERVAL_MS || 5000;
 
 const ethData = new EventMap(ETH_MAP_SIZE);
 let pendingDatas = [];
@@ -50,7 +50,7 @@ async function init() {
     } catch (err) {
       console.error(err);
     }
-  }, LIKE_LOOP_INTERVAL);
+  }, LIKE_LOOP_INTERVAL_MS);
 }
 
 /* web server */
