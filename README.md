@@ -1,6 +1,6 @@
 # LikeCoin Tunnel
 
-[![CircleCI](https://circleci.com/gh/likecoin/likecoin-tunnel.svg?style=svg)](https://circleci.com/gh/likecoin/likecoin-tunnel)
+[![CircleCI](https://circleci.com/gh/likecoin/likecoin-tunnel.svg?style=svg)](https://circleci.com/gh/likecoin/likecoin-tunnel) [![Greenkeeper badge](https://badges.greenkeeper.io/likecoin/likecoin-tunnel.svg)](https://greenkeeper.io/)
 
 Sync between LikeChain and Ethereum chain.
 
